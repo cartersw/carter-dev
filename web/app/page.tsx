@@ -7,6 +7,7 @@ const name = "carter.wildenradt";
 
 export default function Home() {
   const [text, setText] = useState(binary);
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     let progress = 0;
@@ -24,6 +25,7 @@ export default function Home() {
       if (progress >= name.length) {
         clearInterval(interval);
         setText(name);
+        setFinished(true);
       }
     }, 120);
 
