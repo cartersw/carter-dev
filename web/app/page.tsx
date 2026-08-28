@@ -31,10 +31,26 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black">
-      <p className="font-mono text-xl text-white md:text-2xl">
-        {text}
-      </p>
+   <main className="min-h-screen bg-black text-white">
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <p className="text-xl md:text-2xl">
+          {text}
+        </p>
+
+        <div className="mt-12 flex gap-12">
+          <section>
+            [about]
+          </section>
+
+          <section>
+            [projects]
+          </section>
+
+          <section>
+            [contact]
+          </section>
+        </div>
+      </div>
     </main>
   );
 }
