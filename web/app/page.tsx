@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useTypewriter } from "./hooks/useTypewriter";
+import { COMMANDS } from "./constants/commands";
+import { useCommandQueue } from "./hooks/useCommandQueue";
+import { buildCdCommand } from "./lib/terminalCommands";
 const fullBinary = "01001010 01100101 01110010 01110010 01111001";
 const binary =  "01001010011001010";
 const name = "carter.wildenradt";
@@ -12,12 +14,16 @@ const sections: Section[] = ["about", "projects", "contact"];
 
 export default function Home() {
   const [text, setText] = useState(binary);
-  const [terminalHistory, setTerminalHistory] = useState("");
   const [finished, setFinished] = useState(false);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
-  const [activeDirectory, setActiveDirectory] = useState(baseDirectory);
-  const [command, setCommand] = useState<string | null>(null);
-  const { displayText: promptLine, finished: commandFinished } = useTypewriter(command, 40);
+  const {
+    promptLine,
+    history: terminalHistory,
+    directory: activeDirectory,
+    enqueue,
+    projectedDirectory,
+    reset,
+  } = useCommandQueue(baseDirectory);
   const promptOpen = activeSection !== null;
   const terminalContentRef = useRef<HTMLDivElement>(null);
   const [terminalHeight, setTerminalHeight] = useState(0);
@@ -39,27 +45,6 @@ export default function Home() {
 
     return () => observer.disconnect();
   }, [promptOpen, terminalHistory, activeDirectory, promptLine, activeSection]);
-
-  useEffect(() => {
-    if (!activeSection) {
-      setActiveDirectory(baseDirectory);
-      setTerminalHistory("");
-      setCommand(null);
-      return;
-    }else if(activeDirectory === baseDirectory) {
-      setCommand(`cd ${activeSection}`);
-    }else {
-      setCommand(`cd ..\\${activeSection}`);
-    }
-  }, [activeSection]);
-
-  useEffect(() => {
-    if (!commandFinished || !activeSection) return;
-    setTerminalHistory(`${terminalHistory}${activeDirectory}>${command}\n`);
-    setActiveDirectory(`${baseDirectory}${activeSection}`);
-
-    setCommand(null);
-  }, [commandFinished, activeSection]);
 
   useEffect(() => {
     let progress = 0;
@@ -96,11 +81,27 @@ export default function Home() {
             <button
               key={section}
               type="button"
-              onClick={() =>
-                setActiveSection((current) =>
-                  current === section ? null : section
-                )
-              }
+              onClick={() => {
+                if (activeSection === section) {
+                  reset();
+                  setActiveSection(null);
+                  return;
+                }
+
+                const cdCommand = buildCdCommand(
+                  projectedDirectory(),
+                  baseDirectory,
+                  section
+                );
+
+                if (activeSection) {
+                  enqueue(COMMANDS.CLS, cdCommand);
+                } else {
+                  enqueue(cdCommand);
+                }
+
+                setActiveSection(section);
+              }}
               className="cursor-pointer transition-opacity hover:opacity-70"
             >
               [{section}]
