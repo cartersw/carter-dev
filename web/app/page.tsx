@@ -17,9 +17,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeDirectory, setActiveDirectory] = useState(baseDirectory);
   const [command, setCommand] = useState<string | null>(null);
-
-  const { displayText: promptLine, finished: commandFinished } =
-    useTypewriter(command, 40);
+  const { displayText: promptLine, finished: commandFinished } = useTypewriter(command, 40);
   const promptOpen = activeSection !== null;
   const terminalContentRef = useRef<HTMLDivElement>(null);
   const [terminalHeight, setTerminalHeight] = useState(0);
@@ -45,11 +43,14 @@ export default function Home() {
   useEffect(() => {
     if (!activeSection) {
       setActiveDirectory(baseDirectory);
+      setTerminalHistory("");
       setCommand(null);
       return;
+    }else if(activeDirectory === baseDirectory) {
+      setCommand(`cd ${activeSection}`);
+    }else {
+      setCommand(`cd ..\\${activeSection}`);
     }
-
-    setCommand(`cd ${activeSection}`);
   }, [activeSection]);
 
   useEffect(() => {
