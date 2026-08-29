@@ -7,17 +7,22 @@ export type Section = (typeof SECTIONS)[number];
 
 const SECTION_TEXT: Record<Section, string> = {
   about: [
-    "Software engineer who likes small tools, fast pages, and",
-    "keeping things simpler than they need to be.",
+    "Hello my name is Carter, I am a software developer.",
+    "..."
+    
   ].join("\n"),
   projects: [
-    "carter-dev      this site. next.js, typescript, tailwind.",
-    "more soon       ...",
+    "carterwilderadt.dev     this site. next.js, typescript, tailwind.",
+    "Neural Chickens",
+    "Hotel Listing API",
+    "Bloxdle",
+    "Amazondle",
+    "CS Reinforcement Learning Tool"
   ].join("\n"),
   contact: [
-    "email     you@example.com",
+    "email     carterwildenradt@gmail.com",
     "github    github.com/cartersw",
-    "linkedin  linkedin.com/in/your-handle",
+    "linkedin  linkedin.com/in/carterwildenradt",
   ].join("\n"),
 };
 
