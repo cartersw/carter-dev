@@ -1,133 +1,85 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { COMMANDS } from "./constants/commands";
-import { useCommandQueue } from "./hooks/useCommandQueue";
-import { buildCdCommand } from "./lib/terminalCommands";
-const fullBinary = "01001010 01100101 01110010 01110010 01111001";
-const binary =  "01001010011001010";
-const name = "carter.wildenradt";
-const baseDirectory = "C:\\Users\\carter.wilderadt\\";
+import { useState } from "react";
+import { SectionNav } from "./components/SectionNav";
+import { Terminal } from "./components/Terminal";
+import { NAME, NAME_MASK } from "./constants/site";
+import { sectionScript, type Section } from "./content/sections";
+import { useDecodeText } from "./hooks/useDecodeText";
+import { useElementHeight } from "./hooks/useElementHeight";
+import type { TerminalCommand } from "./lib/terminal";
 
-type Section = "about" | "projects" | "contact";
-const sections: Section[] = ["about", "projects", "contact"];
+const PANEL_ID = "terminal-panel";
+
+type Session = {
+  runId: number;
+  section: Section;
+  commands: TerminalCommand[];
+};
 
 export default function Home() {
-  const [text, setText] = useState(binary);
-  const [finished, setFinished] = useState(false);
-  const [activeSection, setActiveSection] = useState<Section | null>(null);
-  const {
-    promptLine,
-    history: terminalHistory,
-    directory: activeDirectory,
-    enqueue,
-    projectedDirectory,
-    reset,
-  } = useCommandQueue(baseDirectory);
-  const promptOpen = activeSection !== null;
-  const terminalContentRef = useRef<HTMLDivElement>(null);
-  const [terminalHeight, setTerminalHeight] = useState(0);
+  const { value: heading, finished: decoded } = useDecodeText(NAME, NAME_MASK);
 
-  useLayoutEffect(() => {
-    const content = terminalContentRef.current;
+  // The session outlives the panel closing so it can animate out. Switching
+  // sections while open appends to the same transcript; reopening from closed
+  // bumps runId, which remounts the terminal and replays it from the top.
+  const [session, setSession] = useState<Session | null>(null);
+  const [open, setOpen] = useState(false);
+  const { ref: contentRef, height: contentHeight } =
+    useElementHeight<HTMLDivElement>();
 
-    if (!content || !promptOpen) {
-      setTerminalHeight(0);
+  const handleSelect = (section: Section) => {
+    if (open && session?.section === section) {
+      setOpen(false);
       return;
     }
 
-    const updateHeight = () => setTerminalHeight(content.scrollHeight);
+    setSession(
+      open && session
+        ? {
+            runId: session.runId,
+            section,
+            commands: [
+              ...session.commands,
+              ...sectionScript(section, session.section),
+            ],
+          }
+        : {
+            runId: (session?.runId ?? 0) + 1,
+            section,
+            commands: sectionScript(section),
+          }
+    );
 
-    updateHeight();
-
-    const observer = new ResizeObserver(updateHeight);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [promptOpen, terminalHistory, activeDirectory, promptLine, activeSection]);
-
-  useEffect(() => {
-    let progress = 0;
-
-    const interval = setInterval(() => {
-      progress++;
-
-      const decoded = name.slice(0, progress);
-      const remainingBinary = binary.slice(
-        Math.floor((binary.length * progress) / name.length)
-      );
-
-      setText(decoded + remainingBinary);
-
-      if (progress >= name.length) {
-        clearInterval(interval);
-        setText(name);
-        setFinished(true);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
+    setOpen(true);
+  };
 
   return (
-   <main className="min-h-screen bg-black text-white">
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <p className="text-xl md:text-2xl">
-          {text}
-        </p>
+    <main className="flex min-h-screen flex-col items-center justify-center px-4">
+      <h1 className="text-xl md:text-2xl" aria-label={NAME}>
+        {heading}
+      </h1>
 
-        <div className="mt-12 flex gap-12">
-          {sections.map((section) => (
-            <button
-              key={section}
-              type="button"
-              onClick={() => {
-                if (activeSection === section) {
-                  reset();
-                  setActiveSection(null);
-                  return;
-                }
+      {decoded && (
+        <SectionNav
+          className="fade-in mt-12"
+          activeSection={open && session ? session.section : null}
+          panelId={PANEL_ID}
+          onSelect={handleSelect}
+        />
+      )}
 
-                const cdCommand = buildCdCommand(
-                  projectedDirectory(),
-                  baseDirectory,
-                  section
-                );
-
-                if (activeSection) {
-                  enqueue(COMMANDS.CLS, cdCommand);
-                } else {
-                  enqueue(cdCommand);
-                }
-
-                setActiveSection(section);
-              }}
-              className="cursor-pointer transition-opacity hover:opacity-70"
-            >
-              [{section}]
-            </button>
-          ))}
-        </div>
-
-        <div
-          className={`prompt-panel mt-6 w-full max-w-3xl px-4 ${
-            promptOpen ? "prompt-panel-open" : ""
-          }`}
-          style={{ maxHeight: promptOpen ? terminalHeight : 0 }}
-        >
-          <div ref={terminalContentRef}>
-            {activeSection && (
-              <p className="whitespace-pre-wrap border border-neutral-700 bg-neutral-950 px-4 py-3 text-left text-sm md:text-base">
-                <span className="text-neutral-500">
-                  {terminalHistory}
-                  {activeDirectory}
-                  {">"}
-                </span>
-                {promptLine}
-                <span className="cursor">|</span>
-              </p>
-            )}
-          </div>
+      <div
+        id={PANEL_ID}
+        aria-hidden={!open}
+        className={`collapsible w-full max-w-3xl ${open ? "collapsible-open" : ""}`}
+        style={{ height: open ? contentHeight : 0 }}
+      >
+        {/* Spacing lives inside the measured box so it counts toward height. */}
+        <div ref={contentRef} className="pt-6">
+          {session && (
+            <Terminal key={session.runId} commands={session.commands} />
+          )}
         </div>
       </div>
     </main>

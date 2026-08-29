@@ -1,27 +1,8 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #000000;
+  color: #ffffff;
   font-family: Consolas, "Courier New", monospace;
 }
 
@@ -41,18 +22,44 @@ body {
   animation: cursor-blink 1s steps(1) infinite;
 }
 
-.prompt-panel {
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-in {
+  animation: fade-in 0.4s ease both;
+}
+
+/* Height comes from useElementHeight so it can grow with the content. */
+.collapsible {
   overflow: hidden;
-  max-height: 0;
   opacity: 0;
   transform: translateY(-8px);
   transition:
-    max-height 0.2s ease,
+    height 0.2s ease,
     opacity 0.2s ease,
     transform 0.2s ease;
 }
 
-.prompt-panel-open {
+.collapsible-open {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
