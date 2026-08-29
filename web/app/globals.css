@@ -47,9 +47,9 @@ body {
   opacity: 0;
   transform: translateY(-8px);
   transition:
-    max-height 0.35s ease,
-    opacity 0.35s ease,
-    transform 0.35s ease;
+    max-height 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .prompt-panel-open {

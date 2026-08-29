@@ -92,9 +92,8 @@ export default function Home() {
         >
           {activeSection && (
             <p className="border border-neutral-700 bg-neutral-950 px-4 py-3 text-left text-sm md:text-base">
-              <span className="text-neutral-500">C:\Users\carter.wilderadt </span>
-              {promptLine}
-              <span className="cursor">_</span>
+              <span className="text-neutral-500">C:\Users\carter.wilderadt\{activeSection}{'>'}</span>
+              <span className="cursor">|</span>
             </p>
           )}
         </div>
