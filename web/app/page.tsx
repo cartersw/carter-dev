@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTypewriter } from "./hooks/useTypewriter";
 const fullBinary = "01001010 01100101 01110010 01110010 01111001";
 const binary =  "01001010011001010";
 const name = "carter.wildenradt";
+const baseDirectory = "C:\\Users\\carter.wilderadt\\";
 
 type Section = "about" | "projects" | "contact";
 const sections: Section[] = ["about", "projects", "contact"];
@@ -12,8 +14,10 @@ export default function Home() {
   const [text, setText] = useState(binary);
   const [finished, setFinished] = useState(false);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
-  const [promptLine, setPromptLine] = useState("");
-  const [promptOpen, setPromptOpen] = useState(false);
+  const [activeDirectory, setActiveDirectory] = useState(baseDirectory);
+  const { displayText: promptLine } = useTypewriter(activeSection, 80);
+  const { displayText: changeDirectory } = useTypewriter("cd " + activeSection, 30);
+  const promptOpen = activeSection !== null;
 
   useEffect(() => {
     let progress = 0;
@@ -37,29 +41,6 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    if (!activeSection) {
-      setPromptOpen(false);
-      setPromptLine("");
-      return;
-    }
-
-    setPromptOpen(true);
-    setPromptLine("");
-
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress++;
-      setPromptLine(activeSection.slice(0, progress));
-
-      if (progress >= activeSection.length) {
-        clearInterval(interval);
-      }
-    }, 80);
-
-    return () => clearInterval(interval);
-  }, [activeSection]);
 
   return (
    <main className="min-h-screen bg-black text-white">
@@ -92,7 +73,8 @@ export default function Home() {
         >
           {activeSection && (
             <p className="border border-neutral-700 bg-neutral-950 px-4 py-3 text-left text-sm md:text-base">
-              <span className="text-neutral-500">C:\Users\carter.wilderadt\{activeSection}{'>'}</span>
+              <span className="text-neutral-500">{baseDirectory}{activeSection}{'>'}</span>
+              
               <span className="cursor">|</span>
             </p>
           )}
