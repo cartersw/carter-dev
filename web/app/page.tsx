@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTypewriter } from "./hooks/useTypewriter";
 const fullBinary = "01001010 01100101 01110010 01110010 01111001";
 const binary =  "01001010011001010";
@@ -12,12 +12,53 @@ const sections: Section[] = ["about", "projects", "contact"];
 
 export default function Home() {
   const [text, setText] = useState(binary);
+  const [terminalHistory, setTerminalHistory] = useState("");
   const [finished, setFinished] = useState(false);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeDirectory, setActiveDirectory] = useState(baseDirectory);
-  const { displayText: promptLine } = useTypewriter(activeSection, 80);
-  const { displayText: changeDirectory } = useTypewriter("cd " + activeSection, 30);
+  const [command, setCommand] = useState<string | null>(null);
+
+  const { displayText: promptLine, finished: commandFinished } =
+    useTypewriter(command, 40);
   const promptOpen = activeSection !== null;
+  const terminalContentRef = useRef<HTMLDivElement>(null);
+  const [terminalHeight, setTerminalHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    const content = terminalContentRef.current;
+
+    if (!content || !promptOpen) {
+      setTerminalHeight(0);
+      return;
+    }
+
+    const updateHeight = () => setTerminalHeight(content.scrollHeight);
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [promptOpen, terminalHistory, activeDirectory, promptLine, activeSection]);
+
+  useEffect(() => {
+    if (!activeSection) {
+      setActiveDirectory(baseDirectory);
+      setCommand(null);
+      return;
+    }
+
+    setCommand(`cd ${activeSection}`);
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (!commandFinished || !activeSection) return;
+    setTerminalHistory(`${terminalHistory}${activeDirectory}>${command}\n`);
+    setActiveDirectory(`${baseDirectory}${activeSection}`);
+
+    setCommand(null);
+  }, [commandFinished, activeSection]);
 
   useEffect(() => {
     let progress = 0;
@@ -67,17 +108,24 @@ export default function Home() {
         </div>
 
         <div
-          className={`prompt-panel mt-6 w-full max-w-md px-4 ${
+          className={`prompt-panel mt-6 w-full max-w-3xl px-4 ${
             promptOpen ? "prompt-panel-open" : ""
           }`}
+          style={{ maxHeight: promptOpen ? terminalHeight : 0 }}
         >
-          {activeSection && (
-            <p className="border border-neutral-700 bg-neutral-950 px-4 py-3 text-left text-sm md:text-base">
-              <span className="text-neutral-500">{baseDirectory}{activeSection}{'>'}</span>
-              
-              <span className="cursor">|</span>
-            </p>
-          )}
+          <div ref={terminalContentRef}>
+            {activeSection && (
+              <p className="whitespace-pre-wrap border border-neutral-700 bg-neutral-950 px-4 py-3 text-left text-sm md:text-base">
+                <span className="text-neutral-500">
+                  {terminalHistory}
+                  {activeDirectory}
+                  {">"}
+                </span>
+                {promptLine}
+                <span className="cursor">|</span>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </main>
