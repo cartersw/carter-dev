@@ -1,7 +1,7 @@
 "use client";
 
 import { useTerminalScript } from "../hooks/useTerminalScript";
-import type { TerminalCommand } from "../lib/terminal";
+import type { TerminalCommand, TerminalLine } from "../lib/terminal";
 
 type TerminalProps = {
   commands: TerminalCommand[];
@@ -17,7 +17,7 @@ export function Terminal({ commands }: TerminalProps) {
           <Prompt directory={command.directory} />
           {command.input}
           {command.output && (
-            <div className="text-neutral-300">{command.output}</div>
+            <TerminalOutput lines={command.output} />
           )}
         </div>
       ))}
@@ -33,4 +33,86 @@ export function Terminal({ commands }: TerminalProps) {
 
 function Prompt({ directory }: { directory: string }) {
   return <span className="text-neutral-500">{directory}&gt;</span>;
+}
+
+function TerminalOutput({ lines }: { lines: TerminalLine[] }) {
+  return (
+    <div className="text-neutral-300">
+      {lines.map((line, index) => (
+        <div key={index}>
+          {"text" in line ? line.text : <EntryLine {...line} />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EntryLine({
+  label,
+  detail,
+  href,
+  link = "label",
+}: {
+  label: string;
+  detail?: string;
+  href?: string;
+  link?: "label" | "detail";
+}) {
+  const linkClass = "underline hover:opacity-70";
+  const external = href && !href.startsWith("mailto:");
+
+  if (href && link === "detail" && detail) {
+    return (
+      <>
+        {label}
+        {"     "}
+        <a
+          href={href}
+          {...(external && {
+            target: "_blank",
+            rel: "noopener noreferrer",
+          })}
+          className={linkClass}
+        >
+          {detail}
+        </a>
+      </>
+    );
+  }
+
+  if (href) {
+    return detail ? (
+      <>
+        <a
+          href={href}
+          {...(external && {
+            target: "_blank",
+            rel: "noopener noreferrer",
+          })}
+          className={linkClass}
+        >
+          {label}
+        </a>
+        {`  -  ${detail}`}
+      </>
+    ) : (
+      <a
+        href={href}
+        {...(external && {
+          target: "_blank",
+          rel: "noopener noreferrer",
+        })}
+        className={linkClass}
+      >
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <>
+      {label}
+      {detail && `     ${detail}`}
+    </>
+  );
 }

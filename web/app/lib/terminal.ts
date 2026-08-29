@@ -1,7 +1,17 @@
+export type TerminalLine =
+  | { text: string }
+  | {
+      label: string;
+      detail?: string;
+      href?: string;
+      /** Which part is clickable when `href` is set. Defaults to `label`. */
+      link?: "label" | "detail";
+    };
+
 export type TerminalCommand = {
   directory: string;
   input: string;
-  output?: string;
+  output?: TerminalLine[];
   /** Wipes everything above this command once it finishes typing. */
   clears?: boolean;
 };

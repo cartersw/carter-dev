@@ -1,29 +1,60 @@
 import { HOME_DIRECTORY } from "../constants/site";
-import type { TerminalCommand } from "../lib/terminal";
+import type { TerminalCommand, TerminalLine } from "../lib/terminal";
 
 export const SECTIONS = ["about", "projects", "contact"] as const;
 
 export type Section = (typeof SECTIONS)[number];
 
-const SECTION_TEXT: Record<Section, string> = {
+const SECTION_CONTENT: Record<Section, TerminalLine[]> = {
   about: [
-    "Hello my name is Carter, I am a software developer.",
-    "..."
-    
-  ].join("\n"),
+    { text: "Hello my name is Carter, I am a full-stack software developer." },
+    {
+      text: "I am currently employed at StarPlus Energy, a joint venture by Samsung and Stellantis, supporting and debugging their MES application.",
+    },
+    {
+      text: "I enjoy building web apps and video games in my free time. One of my favorite parts of development is designing backend architecture.",
+    },
+    {
+      text: "Some hobbies of mine are skateboarding, collecting Counter-Strike skins, and investing.",
+    },
+  ],
   projects: [
-    "carterwilderadt.dev     this site. next.js, typescript, tailwind.",
-    "Neural Chickens",
-    "Hotel Listing API",
-    "Bloxdle",
-    "Amazondle",
-    "CS Reinforcement Learning Tool"
-  ].join("\n"),
+    {
+      label: "carterwildenradt.dev",
+      detail: "next.js, typescript, tailwind",
+      href: "https://carterwildenradt.dev",
+    },
+    { label: "Neural Chickens", 
+      href: "https://github.com/cartersw/neural-chickens" },
+    { label: "Hotel Listing API", 
+      href: "https://github.com/cartersw/hotel-listing-api" },
+    { label: "Bloxdle", 
+      href: "https://github.com/cartersw/bloxdle" },
+    { label: "Amazondle", 
+      href: "https://github.com/cartersw/Amazondle" },
+    { label: "CS Reinforcement Learning Tool", 
+      href: "https://github.com/cartersw/auto-farmer-cs" },
+  ],
   contact: [
-    "email     carterwildenradt@gmail.com",
-    "github    github.com/cartersw",
-    "linkedin  linkedin.com/in/carterwildenradt",
-  ].join("\n"),
+    {
+      label: "email",
+      detail: "carterwildenradt@gmail.com",
+      href: "mailto:carterwildenradt@gmail.com",
+      link: "detail",
+    },
+    {
+      label: "github",
+      detail: "github.com/cartersw",
+      href: "https://github.com/cartersw",
+      link: "detail",
+    },
+    {
+      label: "linkedin",
+      detail: "linkedin.com/in/carterwildenradt",
+      href: "https://linkedin.com/in/carterwildenradt",
+      link: "detail",
+    },
+  ],
 };
 
 const directoryFor = (section: Section) => `${HOME_DIRECTORY}\\${section}`;
@@ -49,7 +80,7 @@ export function sectionScript(
     {
       directory: directoryFor(section),
       input: `type ${section}.txt`,
-      output: SECTION_TEXT[section],
+      output: SECTION_CONTENT[section],
     },
   ];
 }
