@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const CHARACTER_MS = 100;
+const CHARACTER_MS = 75;
 
 /**
  * Reveals `text` one character at a time, padding the tail with `mask` so the
