@@ -72,7 +72,7 @@ export default function Home() {
       <div
         id={PANEL_ID}
         aria-hidden={!open}
-        className={`collapsible w-full max-w-3xl ${open ? "collapsible-open" : ""}`}
+        className={`collapsible w-full max-w-4xl ${open ? "collapsible-open" : ""}`}
         style={{ height: open ? contentHeight : 0 }}
       >
         {/* Spacing lives inside the measured box so it counts toward height. */}
