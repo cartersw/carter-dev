@@ -34,7 +34,7 @@ const SECTION_CONTENT: Record<Section, TerminalLine[]> = {
       detail: "Lua",
       href: "https://github.com/cartersw/bloxdle" },
     { label: "Amazondle", 
-      detail: "Next.js, TypeScript, Tailwind",
+      detail: "Vite, TypeScript, Tailwind",
       href: "https://github.com/cartersw/Amazondle" },
     { label: "CS Reinforcement Learning Tool", 
       detail: "Python",
@@ -64,11 +64,7 @@ const SECTION_CONTENT: Record<Section, TerminalLine[]> = {
 
 const directoryFor = (section: Section) => `${HOME_DIRECTORY}\\${section}`;
 
-/**
- * Commands to type for a section. When `from` is set the session is already
- * showing another section, so it clears the screen and steps sideways into
- * the new one instead of starting from home.
- */
+
 export function sectionScript(
   section: Section,
   from?: Section | null
